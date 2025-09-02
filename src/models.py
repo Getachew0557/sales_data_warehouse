@@ -1,23 +1,58 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from datetime import datetime
+from sqlalchemy import Column, Integer, String, Float, DateTime
 from .database import Base
 
-class TodoItem(Base):
-    __tablename__ = "todo_items"
+# Bronze Layer
+class RawSale(Base):
+    __tablename__ = "raw_sales"
+    order_id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(Integer)
+    product_id = Column(Integer)
+    region = Column(String)
+    quantity = Column(Integer)
+    unit_price = Column(Float)
+    order_date = Column(DateTime)
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    description = Column(String, nullable=True)
-    completed = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+# Silver Layer
+class CleanSale(Base):
+    __tablename__ = "clean_sales"
+    order_id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(Integer)
+    product_id = Column(Integer)
+    region = Column(String)
+    quantity = Column(Integer)
+    unit_price = Column(Float)
+    order_date = Column(DateTime)
 
-class ArchivedTodoItem(Base):
-    __tablename__ = "archived_todo_items"
+# Gold Layer: Star Schema
+class DimCustomer(Base):
+    __tablename__ = "dim_customers"
+    customer_id = Column(Integer, primary_key=True, index=True)
+    customer_name = Column(String)
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    description = Column(String, nullable=True)
-    completed = Column(Boolean)
-    created_at = Column(DateTime)
-    archived_at = Column(DateTime, default=datetime.utcnow)
+class DimProduct(Base):
+    __tablename__ = "dim_products"
+    product_id = Column(Integer, primary_key=True, index=True)
+    product_name = Column(String)
+
+class DimRegion(Base):
+    __tablename__ = "dim_regions"
+    region_id = Column(Integer, primary_key=True, index=True)
+    region_name = Column(String)
+
+class DimDate(Base):
+    __tablename__ = "dim_dates"
+    date_id = Column(Integer, primary_key=True, index=True)
+    date = Column(DateTime)
+    year = Column(Integer)
+    month = Column(Integer)
+    day = Column(Integer)
+
+class FactSale(Base):
+    __tablename__ = "fact_sales"
+    sale_id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(Integer)
+    product_id = Column(Integer)
+    region_id = Column(Integer)
+    date_id = Column(Integer)
+    quantity = Column(Integer)
+    total_price = Column(Float)
